@@ -4,10 +4,15 @@
   "description": "Pet Claude della spa: a pixel-art desktop pet that follows Claude Code activity",
   "type": "commonjs",
   "private": true,
+  "main": "src/main/main.js",
   "scripts": {
     "test": "node --test tests/",
     "install-hooks": "node src/hooks/install.js",
-    "uninstall-hooks": "node src/hooks/install.js --uninstall"
+    "uninstall-hooks": "node src/hooks/install.js --uninstall",
+    "start": "electron ."
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "electron": "45.4.1"
+  }
 }

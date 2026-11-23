@@ -58,3 +58,43 @@ test('consecutive frames differ by a modest number of pixels (no flashing)', () 
     }
   }
 });
+
+// Matilde's character: blocky creature, 12x8 base grid, drawn at 3x.
+const BASE = [
+  '..XXXXXXXX..',
+  '..XEXXXXEX..',
+  'XXXXXXXXXXXX',
+  'XXXXXXXXXXXX',
+  '..XXXXXXXX..',
+  '..XXXXXXXX..',
+  '..X.X..X.X..',
+  '..X.X..X.X..',
+];
+
+function containsCreature(frame) {
+  for (let oy = 0; oy + 24 <= 48; oy++) {
+    for (let ox = 0; ox + 36 <= 48; ox++) {
+      let ok = true;
+      for (let y = 0; y < 24 && ok; y++) {
+        for (let x = 0; x < 36 && ok; x++) {
+          const cell = BASE[Math.floor(y / 3)][Math.floor(x / 3)];
+          const want = cell === 'X' ? '2' : cell === 'E' ? '7' : '.';
+          if (frame[oy + y][ox + x] !== want) ok = false;
+        }
+      }
+      if (ok) return true;
+    }
+  }
+  return false;
+}
+
+test('body colour is terracotta #D97757 and eyes are black-ish', () => {
+  assert.equal(PALETTE[2].toLowerCase(), '#d97757');
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(PALETTE[7].substr(i, 2), 16));
+  assert.ok(r + g + b < 90, `eyes too light: ${PALETTE[7]}`);
+});
+
+test('mid-jump frames show the full base creature at 3x', () => {
+  assert.ok(containsCreature(SPRITES.onsen_to_gym.frames[1]), 'onsen_to_gym[1]');
+  assert.ok(containsCreature(SPRITES.gym_to_onsen.frames[1]) === false, 'gym_to_onsen[1] has happy eyes, so not the base face');
+});

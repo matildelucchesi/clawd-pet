@@ -1,6 +1,6 @@
 # Pet Claude della spa — Implementation Plan
 
-**Goal:** A pixel-art star pet in a small always-on-top Windows desktop window that soaks in an onsen while Claude is idle and goes to the gym while Claude Code (Code tab, terminal, Cowork if reachable) is working, with petting as the only interaction.
+**Goal:** A pixel-art blocky creature pet in a small always-on-top Windows desktop window that soaks in an onsen while Claude is idle and goes to the gym while Claude Code (Code tab, terminal, Cowork if reachable) is working, with petting as the only interaction.
 
 **Architecture:** An Electron app with a transparent, frameless, always-on-top window. The main process runs a tiny HTTP server on `127.0.0.1:47321`; Claude Code hooks POST their event JSON to it with `curl`. A pure state module turns hook events into `'onsen' | 'gym'`, and the renderer draws palette-indexed sprites on a canvas with slow frame timing.
 
@@ -8,7 +8,8 @@
 
 ## Global Constraints
 - Platform: Windows 10/11 x64. Hooks use the built-in `curl.exe`.
-- Pet: soft orange/terracotta star with a simple face (two dot eyes, small mouth), star points as arms/feet. Original character, no copied assets.
+- Pet (changed 2026-11-23 at Matilde's request, from her reference image): flat blocky creature, colour #D97757 with black square eyes, no outline. Base shape on a 12×8 grid ('X' body, 'E' eye), drawn at 3× (36×24) inside the 48×48 sprite:
+  `..XXXXXXXX..` / `..XEXXXXEX..` / `XXXXXXXXXXXX` / `XXXXXXXXXXXX` / `..XXXXXXXX..` / `..XXXXXXXX..` / `..X.X..X.X..` / `..X.X..X.X..` (wide body, two eyes near the top, stubby arms at rows 2–3, four short legs).
 - Pixel art, palette of 8–12 colours, sprite 48×48 logical pixels drawn at 3× (144×144), nearest-neighbour scaling.
 - Slow animations: no frame shorter than 250 ms; nothing flashing.
 - Scenes: `onsen` (idle: in steaming water, folded towel on head, half-closed eyes, occasional bubble) and `gym` (working: lifting weights or pedalling slowly, sweat drop).

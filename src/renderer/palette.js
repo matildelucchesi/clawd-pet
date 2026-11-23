@@ -4,12 +4,12 @@
   const PALETTE = [
     'transparent', // 0  unused (sprites use '.' for transparent)
     '#3b2626',     // 1  outline / dark brown
-    '#d9774b',     // 2  star terracotta
-    '#f2a477',     // 3  star highlight
+    '#d97757',     // 2  body terracotta
+    '#f2a477',     // 3  spare light terracotta (unused)
     '#6fb3d2',     // 4  water / sweat
     '#d6eef5',     // 5  steam / water shine
     '#f7f0e4',     // 6  towel
-    '#2a1f2e',     // 7  eyes / mouth
+    '#141010',     // 7  eyes
     '#ee8c8c',     // 8  blush / heart
     '#6d7290',     // 9  gym mat
     '#bcc0cc',     // a  metal
