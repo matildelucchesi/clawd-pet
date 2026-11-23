@@ -37,6 +37,7 @@ To build a standalone app: `npm run dist` creates `dist\win-unpacked\PetClaudeSp
 - Drag Clawd anywhere with the left mouse button.
 - Quit from the tray icon near the clock: right-click, then **Esci**.
 - Remove the hooks with `npm run uninstall-hooks`.
+- Start it with Windows: put a shortcut to `dist\win-unpacked\PetClaudeSpa.exe` in `shell:startup` (press `Win+R`, type `shell:startup`). Delete the shortcut to turn it off.
 
 ## Development
 
