@@ -39,7 +39,9 @@ Aggiunge degli hook a `%USERPROFILE%\.claude\settings.json`:
 - mantiene tutte le impostazioni e gli hook che c'erano già;
 - puoi rilanciarlo quante volte vuoi: se è già tutto a posto non cambia nulla.
 
-Gli hook mandano a `127.0.0.1:47321` solo il nome dell'evento e la sessione. Se il pet è chiuso, falliscono in silenzio in meno di mezzo secondo e Claude va avanti come se niente fosse.
+Gli hook partono in background (`"async": true`): Claude non aspetta il pet, né quando è aperto né quando è chiuso. Se il pet è chiuso falliscono in silenzio.
+
+Privacy: Claude Code passa all'hook tutti i dati dell'evento (anche il testo del prompt e l'output dei comandi) e l'hook li inoltra così come sono a `127.0.0.1:47321`, cioè solo dentro il tuo PC. Il pet ne legge soltanto il nome dell'evento e l'id della sessione e scarta il resto. Se però un altro programma occupasse quella porta (l'icona del pet direbbe "Porta occupata"), riceverebbe lui quei dati: in quel caso chiudi quel programma o togli gli hook.
 
 Le sessioni di Claude Code già aperte leggono gli hook solo all'avvio: dopo l'installazione apri una **nuova** sessione.
 
@@ -53,6 +55,8 @@ Le sessioni di Claude Code già aperte leggono gli hook solo all'avvio: dopo l'i
 | **Chat** normale di Claude | Resta all'onsen: la chat non usa gli hook e il pet non prova a indovinare |
 
 Con più sessioni aperte insieme resta in palestra finché **tutte** hanno finito.
+
+Quando Claude ti chiede un permesso (per esempio per lanciare un comando) il pet torna all'onsen, perché Claude sta aspettando te. Dopo che approvi, se il comando è lungo (un'installazione, una build) il pet resta all'onsen finché il comando non finisce: Claude Code non manda nessun segnale nel frattempo.
 
 ### Cowork
 

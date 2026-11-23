@@ -28,6 +28,27 @@ test('adds all six events to empty settings', () => {
   for (const e of SIX) assert.equal(out.hooks[e][0].hooks[0].timeout, 5);
 });
 
+test('hooks run async so Claude never waits on the pet', () => {
+  const out = mergeHooks({});
+  for (const e of SIX) assert.equal(out.hooks[e][0].hooks[0].async, true, e);
+});
+
+test('an older pet hook (different command string) is upgraded in place, not duplicated', () => {
+  const old = 'curl.exe -s -m 1 -X POST -H "Content-Type: application/json" --data-binary @- http://127.0.0.1:47321/hook || exit 0';
+  const before = {
+    hooks: {
+      Stop: [
+        { hooks: [{ type: 'command', command: 'echo done' }] },
+        { hooks: [{ type: 'command', command: old, timeout: 5 }] },
+      ],
+    },
+  };
+  const out = mergeHooks(before);
+  assert.deepEqual(commandsFor(out, 'Stop'), ['echo done', HOOK_COMMAND]);
+  assert.equal(out.hooks.Stop[1].hooks[0].async, true);
+  assert.deepEqual(removeHooks(out), { hooks: { Stop: [{ hooks: [{ type: 'command', command: 'echo done' }] }] } });
+});
+
 test('keeps existing hooks and unrelated keys', () => {
   const existing = {
     enabledPlugins: { 'x@y': true },

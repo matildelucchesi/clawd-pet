@@ -11,8 +11,13 @@ const EVENTS = ['UserPromptSubmit', 'PreToolUse', 'PostToolUse', 'Stop', 'Sessio
 
 function clone(v) { return JSON.parse(JSON.stringify(v)); }
 
-function hasOurHook(groups) {
-  return groups.some((g) => Array.isArray(g.hooks) && g.hooks.some((h) => h && h.command === HOOK_COMMAND));
+// async: Claude Code starts the hook and carries on without waiting for it.
+const HOOK_ENTRY = { type: 'command', command: HOOK_COMMAND, timeout: 5, async: true };
+const ENDPOINT = '127.0.0.1:47321/hook';
+
+// Any command hitting our endpoint is ours (older installs used other flags).
+function isOurs(h) {
+  return !!h && typeof h.command === 'string' && h.command.includes(ENDPOINT);
 }
 
 function mergeHooks(settings) {
@@ -20,9 +25,16 @@ function mergeHooks(settings) {
   if (!out.hooks || typeof out.hooks !== 'object') out.hooks = {};
   for (const event of EVENTS) {
     const groups = Array.isArray(out.hooks[event]) ? out.hooks[event] : [];
-    if (!hasOurHook(groups)) {
-      groups.push({ hooks: [{ type: 'command', command: HOOK_COMMAND, timeout: 5 }] });
+    let found = false;
+    for (const g of groups) {
+      if (!g || !Array.isArray(g.hooks)) continue;
+      g.hooks = g.hooks.map((h) => {
+        if (!isOurs(h)) return h;
+        found = true;
+        return clone(HOOK_ENTRY);
+      });
     }
+    if (!found) groups.push({ hooks: [clone(HOOK_ENTRY)] });
     out.hooks[event] = groups;
   }
   return out;
@@ -35,8 +47,8 @@ function removeHooks(settings) {
     const groups = out.hooks[event];
     if (!Array.isArray(groups)) continue;
     const kept = groups
-      .map((g) => (Array.isArray(g.hooks) ? { ...g, hooks: g.hooks.filter((h) => !h || h.command !== HOOK_COMMAND) } : g))
-      .filter((g) => !Array.isArray(g.hooks) || g.hooks.length > 0);
+      .map((g) => (g && Array.isArray(g.hooks) ? { ...g, hooks: g.hooks.filter((h) => !isOurs(h)) } : g))
+      .filter((g) => !g || !Array.isArray(g.hooks) || g.hooks.length > 0);
     if (kept.length) out.hooks[event] = kept; else delete out.hooks[event];
   }
   if (Object.keys(out.hooks).length === 0) delete out.hooks;
