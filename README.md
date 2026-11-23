@@ -23,7 +23,19 @@ Oppure senza Node: usa l'eseguibile creato con `npm run dist`:
 - `dist\PetClaudeSpa.exe` — un solo file portatile. Si scompatta da solo a ogni avvio, quindi ci mette **circa 20–30 secondi** a comparire.
 - `dist\win-unpacked\PetClaudeSpa.exe` — stessa app già scompattata, parte subito (tieni tutta la cartella `win-unpacked`).
 
-Per farlo partire all'accensione del PC: premi `Win+R`, scrivi `shell:startup` e mettici un collegamento a uno dei due `.exe`.
+### Avvio automatico e collegamento sul desktop
+
+Incolla questo in PowerShell: crea "Pet Claude Spa" sia nell'avvio automatico di Windows sia sul desktop.
+
+```powershell
+$exe = 'C:\personal-workspace\pet\pet-spa\dist\win-unpacked\PetClaudeSpa.exe'; $ws = New-Object -ComObject WScript.Shell; foreach ($d in 'Startup','Desktop') { $s = $ws.CreateShortcut((Join-Path ([Environment]::GetFolderPath($d)) 'Pet Claude Spa.lnk')); $s.TargetPath = $exe; $s.WorkingDirectory = (Split-Path $exe); $s.Save() }
+```
+
+Da quel momento il pet parte da solo quando entri in Windows, e puoi aprirlo col doppio clic sull'icona "Pet Claude Spa" del desktop.
+
+Per togliere l'avvio automatico: premi `Win+R`, scrivi `shell:startup`, premi Invio e cancella "Pet Claude Spa". Il collegamento sul desktop lo puoi cancellare normalmente.
+
+Se sposti la cartella `pet-spa` o rigeneri il programma in un'altra posizione, i collegamenti vanno rifatti.
 
 La creatura compare in basso a destra. Puoi trascinarla dove vuoi tenendo premuto il tasto sinistro sopra di lei. Le parti trasparenti della finestra lasciano passare i clic.
 
