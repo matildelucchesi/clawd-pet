@@ -86,11 +86,11 @@
   }
 
   // ---- onsen ----
-  const WATER_Y = 32;
-  const ONSEN_Y = WATER_Y - 2 * CELL - 1; // only head, eyes (and towel) above the water
+  const WATER_Y = 34; // front water line: the pet is cut here
+  const ONSEN_Y = WATER_Y - 2 * CELL; // water right at the bottom edge of the eyes
   function drawTub(g, ripple) {
-    shape(g, (x, y) => inEllipse(x, y, 24, 39, 23.5, 8), 'b', '1');
-    shape(g, (x, y) => inEllipse(x, y, 24, 38, 20, 5.5), '4', null);
+    shape(g, (x, y) => inEllipse(x, y, 24, 37, 23.5, 10), 'b', '1');
+    shape(g, (x, y) => inEllipse(x, y, 24, 36.5, 20, 7.5), '4', null);
     for (let x = 6; x < 42; x++) if ((x + ripple * 3) % 7 === 0) put(g, x, WATER_Y + 2, '5');
     for (let x = 10; x < 38; x++) if ((x + ripple * 2) % 9 === 0) put(g, x, WATER_Y + 4, '5');
   }
@@ -188,8 +188,9 @@
     stamp(g, OX - 2, WATER_Y - 3 - lift, ['5..', '.5.']);
     stamp(g, OX + BODY_W - 1, WATER_Y - 3 - lift, ['..5', '.5.']);
   };
-  function airFrame(oy, { eyes = 'open' } = {}) {
+  function airFrame(oy, { eyes = 'open', tub = false } = {}) {
     const g = blank();
+    if (tub) drawTub(g, 0);
     drawCreature(g, oy, { eyes });
     stamp(g, 20, oy + 8 * CELL + 2, ['5...5...5', '.5.5.5.5.']);
     return g;
@@ -222,7 +223,7 @@
     ]),
     gym_to_onsen: anim(400, [
       gymFrame({ oy: GYM_Y - 3, weights: false, sweatY: null, extra: (g) => { drawDumbbell(g, 4, MAT_Y - 4); drawDumbbell(g, 43, MAT_Y - 4); } }),
-      airFrame(9, { eyes: 'happy' }),
+      airFrame(6, { eyes: 'happy', tub: true }),
       onsenFrame({ oy: ONSEN_Y, eyes: 'happy', towel: false, extra: splash(2) }),
     ]),
     pet_onsen: anim(450, [
