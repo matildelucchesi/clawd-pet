@@ -9,10 +9,26 @@
     "test": "node --test tests/",
     "install-hooks": "node src/hooks/install.js",
     "uninstall-hooks": "node src/hooks/install.js --uninstall",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "electron": "45.4.1"
+    "electron": "45.4.1",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "local.petclaudespa",
+    "productName": "PetClaudeSpa",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "portable": {
+      "artifactName": "PetClaudeSpa.exe"
+    }
   }
 }
