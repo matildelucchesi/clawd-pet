@@ -1,0 +1,11 @@
+{
+  "name": "pet-claude-spa",
+  "version": "1.0.0",
+  "description": "Pet Claude della spa: a pixel-art desktop pet that follows Claude Code activity",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/"
+  },
+  "license": "UNLICENSED"
+}
