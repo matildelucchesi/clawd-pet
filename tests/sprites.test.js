@@ -98,3 +98,45 @@ test('mid-jump frames show the full base creature at 3x', () => {
   assert.ok(containsCreature(SPRITES.onsen_to_gym.frames[1]), 'onsen_to_gym[1]');
   assert.ok(containsCreature(SPRITES.gym_to_onsen.frames[1]) === false, 'gym_to_onsen[1] has happy eyes, so not the base face');
 });
+
+// Onsen: only the top of the head, the eyes and the towel stick out of the water.
+const lowestRow = (frame, ch) => {
+  for (let y = 47; y >= 0; y--) if (frame[y].includes(ch)) return y;
+  return -1;
+};
+
+test('in the onsen the water line sits just below the eyes', () => {
+  for (const name of ['onsen_idle', 'onsen_bubble', 'pet_onsen']) {
+    SPRITES[name].frames.forEach((f, i) => {
+      const eyes = lowestRow(f, '7');
+      const body = lowestRow(f, '2');
+      assert.ok(eyes > 0, `${name}[${i}] eyes visible`);
+      assert.ok(body - eyes <= 1, `${name}[${i}]: body shows ${body - eyes} rows below the eyes`);
+    });
+  }
+});
+
+test('steam rises in staggered wisps: low and high puffs in every idle frame', () => {
+  const idle = SPRITES.onsen_idle.frames;
+  assert.equal(idle.length, 4);
+  const steamIn = (f, y0, y1) => {
+    let n = 0;
+    for (let y = y0; y <= y1; y++) for (let x = 0; x < 48; x++) if ((x < 11 || x > 36) && f[y][x] === '5') n++;
+    return n;
+  };
+  idle.forEach((f, i) => {
+    assert.ok(steamIn(f, 22, 30) > 0, `frame ${i}: no steam near the water`);
+    assert.ok(steamIn(f, 0, 14) > 0, `frame ${i}: no steam up high`);
+  });
+});
+
+test('in the onsen the arms are under water', () => {
+  for (const name of ['onsen_idle', 'onsen_bubble', 'pet_onsen']) {
+    SPRITES[name].frames.forEach((f, i) => {
+      for (let y = 0; y < 48; y++) {
+        assert.notEqual(f[y][6], '2', `${name}[${i}] left arm at y=${y}`);
+        assert.notEqual(f[y][41], '2', `${name}[${i}] right arm at y=${y}`);
+      }
+    });
+  }
+});

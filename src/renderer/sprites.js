@@ -52,13 +52,13 @@
   const OX = (W - BODY_W) / 2; // creature is always horizontally centred
 
   // eyes: 'open' | 'half' | 'happy'; armsUp raises the arm blocks to head height.
-  function drawCreature(g, oy, { eyes = 'open', blush = false, armsUp = false, clipY = H } = {}) {
+  function drawCreature(g, oy, { eyes = 'open', blush = false, armsUp = false, clipY = H, armClipY = clipY } = {}) {
     BASE.forEach((row, cy) => {
       for (let cx = 0; cx < 12; cx++) {
         if (row[cx] === '.') continue;
         const isArm = cx < 2 || cx > 9;
         if (armsUp && isArm) continue;
-        rect(g, OX + cx * CELL, oy + cy * CELL, CELL, CELL, '2', clipY);
+        rect(g, OX + cx * CELL, oy + cy * CELL, CELL, CELL, '2', isArm ? Math.min(clipY, armClipY) : clipY);
       }
     });
     if (armsUp) {
@@ -87,7 +87,7 @@
 
   // ---- onsen ----
   const WATER_Y = 32;
-  const ONSEN_Y = 20; // creature top in the tub: rows 0-3 (head + arms) above water
+  const ONSEN_Y = WATER_Y - 2 * CELL - 1; // only head, eyes (and towel) above the water
   function drawTub(g, ripple) {
     shape(g, (x, y) => inEllipse(x, y, 24, 39, 23.5, 8), 'b', '1');
     shape(g, (x, y) => inEllipse(x, y, 24, 38, 20, 5.5), '4', null);
@@ -106,20 +106,32 @@
       '.111111111111111111111111.',
     ]);
   }
-  const STEAM = [
-    ['.5.', '5..', '.5.', '..5', '.5.'],
-    ['..5', '.5.', '5..', '.5.', '..5'],
+  // Rising steam: each wisp loops through 4 phases (just above the water -> high up,
+  // thinner as it rises), drifting a little sideways. Wisps are out of step.
+  const WISP = [
+    { dy: 0, rows: ['.5', '55'] },
+    { dy: -7, rows: ['.5', '5.', '.5', '5.'] },
+    { dy: -14, rows: ['5.', '.5', '5.'] },
+    { dy: -21, rows: ['.5'] },
   ];
+  const WISP_DRIFT = [0, 1, 0, -1];
+  const WISPS = [
+    { x: 5, y: 27, offset: 0 },
+    { x: 40, y: 27, offset: 2 },
+    { x: 9, y: 26, offset: 1 },
+  ];
+  const STEAM_PHASES = WISP.length;
   function drawSteam(g, phase) {
-    stamp(g, 3, 6 - (phase % 2), STEAM[phase % 2]);
-    stamp(g, 42, 9 - ((phase + 1) % 2), STEAM[(phase + 1) % 2]);
-    stamp(g, 37, 1 + (phase % 3), STEAM[phase % 2].slice(0, 3));
+    for (const w of WISPS) {
+      const k = (phase + w.offset) % STEAM_PHASES;
+      stamp(g, w.x + WISP_DRIFT[k], w.y + WISP[k].dy, WISP[k].rows);
+    }
   }
   function onsenFrame({ steam = 0, ripple = steam, eyes = 'half', blush = false, oy = ONSEN_Y, towel = true, extra } = {}) {
     const g = blank();
     drawSteam(g, steam);
     drawTub(g, ripple);
-    drawCreature(g, oy, { eyes, blush, clipY: WATER_Y });
+    drawCreature(g, oy, { eyes, blush, clipY: WATER_Y, armClipY: WATER_Y - 1 });
     drawWaterLine(g);
     if (towel) drawTowel(g, oy);
     if (extra) extra(g);
@@ -187,18 +199,19 @@
   const anim = (frameMs, frames) => ({ frameMs, frames: frames.map(toStrings) });
 
   const SPRITES = {
-    onsen_idle: anim(900, [
+    onsen_idle: anim(700, [
       onsenFrame({ steam: 0 }),
       onsenFrame({ steam: 1 }),
       onsenFrame({ steam: 2 }),
+      onsenFrame({ steam: 3 }),
     ]),
     onsen_bubble: anim(500, [
-      onsenFrame({ steam: 0, extra: bubble(36, WATER_Y - 2) }),
-      onsenFrame({ steam: 0, extra: bubble(37, WATER_Y - 6) }),
-      onsenFrame({ steam: 1, extra: bubble(38, WATER_Y - 11) }),
+      onsenFrame({ steam: 0, extra: bubble(36, WATER_Y - 3) }),
+      onsenFrame({ steam: 1, extra: bubble(37, WATER_Y - 7) }),
+      onsenFrame({ steam: 2, extra: bubble(38, WATER_Y - 12) }),
     ]),
     onsen_to_gym: anim(400, [
-      onsenFrame({ oy: ONSEN_Y - 4, eyes: 'open', towel: false, extra: splash(0) }),
+      onsenFrame({ oy: ONSEN_Y - 8, eyes: 'open', towel: false, extra: splash(0) }),
       airFrame(10),
       gymFrame({ sweatY: null }),
     ]),
@@ -210,12 +223,12 @@
     gym_to_onsen: anim(400, [
       gymFrame({ oy: GYM_Y - 3, weights: false, sweatY: null, extra: (g) => { drawDumbbell(g, 4, MAT_Y - 4); drawDumbbell(g, 43, MAT_Y - 4); } }),
       airFrame(9, { eyes: 'happy' }),
-      onsenFrame({ oy: ONSEN_Y + 1, eyes: 'happy', towel: false, extra: splash(2) }),
+      onsenFrame({ oy: ONSEN_Y, eyes: 'happy', towel: false, extra: splash(2) }),
     ]),
     pet_onsen: anim(450, [
-      onsenFrame({ eyes: 'happy', blush: true, extra: heart(38, 10) }),
-      onsenFrame({ eyes: 'happy', blush: true, steam: 1, extra: heart(39, 6) }),
-      onsenFrame({ eyes: 'happy', blush: true, steam: 2, extra: heart(39, 2) }),
+      onsenFrame({ eyes: 'happy', blush: true, extra: heart(30, 14) }),
+      onsenFrame({ eyes: 'happy', blush: true, steam: 1, extra: heart(31, 9) }),
+      onsenFrame({ eyes: 'happy', blush: true, steam: 2, extra: heart(31, 4) }),
     ]),
     pet_gym: anim(450, [
       gymFrame({ eyes: 'happy', blush: true, sweatY: null, extra: heart(38, 8) }),
